@@ -1,0 +1,12 @@
+{
+    "name": "ackintosh/race",
+    "description": "the race coordinator.",
+    "type": "library",
+    "authors": [
+        {
+            "name": "akihito.nakano",
+            "email": "sora.akatsuki@gmail.com"
+        }
+    ],
+    "require": {}
+}
