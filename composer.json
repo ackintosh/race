@@ -1,6 +1,6 @@
 {
     "name": "ackintosh/race",
-    "description": "the race coordinator.",
+    "description": "The Race Coordinator.",
     "type": "library",
     "authors": [
         {
@@ -8,5 +8,15 @@
             "email": "sora.akatsuki@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": "~7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~6.4"
+    },
+    "autoload": {
+    "psr-4": {
+      "Ackintosh\\": "src/"
+    }
+  }
 }
