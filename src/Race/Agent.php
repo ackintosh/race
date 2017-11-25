@@ -15,4 +15,9 @@ class Agent
     {
         $this->pid = $pid;
     }
+
+    public function getPid(): int
+    {
+        return $this->pid;
+    }
 }
