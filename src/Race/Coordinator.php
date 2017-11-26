@@ -15,7 +15,7 @@ class Coordinator
     public function fork(\Closure $job)
     {
         $pid = pcntl_fork();
-        $agent = new Agent(($pid === 0) ? getmygid() : $pid);
+        $agent = new Agent(($pid === 0) ? getmypid() : $pid);
 
         if ($pid === -1) {
             throw new \RuntimeException('Failed to fork.');
