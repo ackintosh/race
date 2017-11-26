@@ -13,6 +13,8 @@ class CoordinatorTest extends \PHPUnit\Framework\TestCase
         $job = function (Agent $agent) {
             // Job requires the preparation that takes 3secs.
             sleep(3);
+            $agent->ready();
+
             return 'test';
         };
 

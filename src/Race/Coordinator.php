@@ -35,9 +35,30 @@ class Coordinator
             return;
         }
 
+        $this->waitUntilReady();
+        $this->notifyAll();
+
         foreach ($this->agents as $agent) {
             $status = null;
             pcntl_waitpid($agent->getPid(), $status);
+        }
+    }
+
+    private function waitUntilReady()
+    {
+        foreach ($this->agents as $agent) {
+            $receivedMessageType = null;
+            $message = null;
+            $resource = msg_get_queue($agent->getPid());
+            msg_receive($resource, 1, $receivedMessageType, 100, $message);
+        }
+    }
+
+    private function notifyAll()
+    {
+        foreach ($this->agents as $agent) {
+            $resource = msg_get_queue($agent->getPid());
+            msg_send($resource, 2, 'notify');
         }
     }
 }
