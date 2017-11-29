@@ -56,9 +56,10 @@ class Coordinator
 
     private function notifyAll()
     {
+        $startAt = microtime(true) + 3;
         foreach ($this->agents as $agent) {
             $resource = msg_get_queue($agent->getPid());
-            msg_send($resource, 2, 'notify');
+            msg_send($resource, 2, $startAt);
         }
     }
 }

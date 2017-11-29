@@ -27,7 +27,11 @@ class Agent
         msg_send($resource, 1, 'ready');
 
         $receivedMessageType = null;
-        $message = null;
-        msg_receive($resource, 2, $receivedMessageType, 100, $message);
+        $raceStartsAt = null;
+        msg_receive($resource, 2, $receivedMessageType, 100, $raceStartsAt);
+
+        while (microtime(true) <= $raceStartsAt) {
+            // wait until the time race should start
+        }
     }
 }
