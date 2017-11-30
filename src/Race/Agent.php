@@ -44,8 +44,8 @@ class Agent
 
         $allProcessIds = $this->queue->receive(AllProcessId::class);
 
-        $this->send($allProcessIds->body());
-        $candidates = $this->receive($allProcessIds->body());
+        $this->sendCandidateTo($allProcessIds);
+        $candidates = $this->receiveCandidatesFrom($allProcessIds);
 
         $raceStartsAt = $this->buildConsensus($candidates);
 
@@ -55,29 +55,29 @@ class Agent
     }
 
     /**
-     * @param int[] $allProcessIds
+     * @param AllProcessId $allProcessId
      * @return void
      */
-    private function send(array $allProcessIds)
+    private function sendCandidateTo(AllProcessId $allProcessIds)
     {
-        $v = microtime(true) + 3;
-        foreach ($allProcessIds as $pid) {
+        $candidate = microtime(true) + 3;
+        foreach ($allProcessIds->body() as $pid) {
             if ($pid === $this->pid) {
                 continue;
             }
 
-            $this->queue->send($pid, $v);
+            $this->queue->send($pid, $candidate);
         }
     }
 
     /**
-     * @param int[] $allProcessIds
+     * @param AllProcessId $allProcessId
      * @return double[]
      */
-    private function receive(array $allProcessIds): array
+    private function receiveCandidatesFrom(AllProcessId $allProcessIds): array
     {
         $candidates = [];
-        foreach ($allProcessIds as $pid) {
+        foreach ($allProcessIds->body() as $pid) {
             if ($pid === $this->pid) {
                 continue;
             }
