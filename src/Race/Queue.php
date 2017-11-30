@@ -18,7 +18,6 @@ class Queue
 
     public function __construct()
     {
-        $this->key = ftok(__FILE__, 'Q');
         $this->keys[Ready::class] = ftok(__FILE__, 'R');
         $this->keys[AllProcessId::class] = ftok(__FILE__, 'P');
         $this->keys[StartingTime::class] = ftok(__FILE__, 'T');
@@ -28,31 +27,23 @@ class Queue
      * @param int $to destination Pid
      * @param $message
      */
-    public function send($to, $message)
+    public function send($to, Message $message)
     {
-        if ($message instanceof Message) {
-            if (!isset($this->keys[get_class($message)])) {
-                throw new \LogicException();
-            }
-            $key = $this->keys[get_class($message)];
-        } else {
-            $key = $this->key;
+        if (!isset($this->keys[get_class($message)])) {
+            throw new \LogicException();
         }
-        $resource = msg_get_queue($key);
+
+        $resource = msg_get_queue($this->keys[get_class($message)]);
         msg_send($resource, $to, $message);
     }
 
-    public function receive(?string $messageClass = null)
+    public function receive(string $messageClass)
     {
-        if ($messageClass) {
-            if (!isset($this->keys[$messageClass])) {
-                throw new \LogicException();
-            }
-            $key = $this->keys[$messageClass];
-        } else {
-            $key = $this->key;
+        if (!isset($this->keys[$messageClass])) {
+            throw new \LogicException();
         }
-        $resource = msg_get_queue($key);
+
+        $resource = msg_get_queue($this->keys[$messageClass]);
         $receivedMessageType = null;
         $message = null;
         msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message);
