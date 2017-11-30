@@ -3,6 +3,7 @@ namespace Ackintosh\Race;
 
 use Ackintosh\Race\Message\AllProcessId;
 use Ackintosh\Race\Message\Ready;
+use Ackintosh\Race\Message\StartingTime;
 
 class Agent
 {
@@ -60,7 +61,7 @@ class Agent
      */
     private function sendCandidateTo(AllProcessId $allProcessIds)
     {
-        $candidate = microtime(true) + 3;
+        $candidate = new StartingTime(microtime(true) + 3);
         foreach ($allProcessIds->body() as $pid) {
             if ($pid === $this->pid) {
                 continue;
@@ -72,7 +73,7 @@ class Agent
 
     /**
      * @param AllProcessId $allProcessId
-     * @return double[]
+     * @return StartingTime[]
      */
     private function receiveCandidatesFrom(AllProcessId $allProcessIds): array
     {
@@ -82,22 +83,22 @@ class Agent
                 continue;
             }
 
-            $candidates[] = $this->queue->receive();
+            $candidates[] = $this->queue->receive(StartingTime::class);
         }
 
         return $candidates;
     }
 
     /**
-     * @param double[] $candidates
+     * @param StartingTime[] $candidates
      * @return double
      */
     private function buildConsensus(array $candidates): float
     {
         $consensus = null;
-        foreach ($candidates as $candidate) {
-            if ($consensus === null || $consensus < $candidate) {
-                $consensus = $candidate;
+        foreach ($candidates as $startingTime) {
+            if ($consensus === null || $consensus < $startingTime->body()) {
+                $consensus = $startingTime->body();
             }
         }
 
