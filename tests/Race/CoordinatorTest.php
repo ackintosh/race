@@ -25,7 +25,9 @@ class CoordinatorTest extends \PHPUnit\Framework\TestCase
 
         // Preparation takes 3sec
         // +
-        // Coordinator notify the agent the time added 3sec
+        // Agents are notify the time which has been added 3sec as candidate of starting time
+        // +
+        // No failure process
         // = 6sec (We allow for a margin of error)
         $this->assertEquals(6, time() - $t, '', 1);
     }
