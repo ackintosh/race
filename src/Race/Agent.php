@@ -1,6 +1,8 @@
 <?php
 namespace Ackintosh\Race;
 
+use Ackintosh\Race\Message\Ready;
+
 class Agent
 {
     /**
@@ -37,7 +39,7 @@ class Agent
     public function ready()
     {
 
-        $this->queue->send($this->coodinatorPid, 'ready');
+        $this->queue->send($this->coodinatorPid, new Ready());
 
         $allProcessIds = $this->queue->receive();
 

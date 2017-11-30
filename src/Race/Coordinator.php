@@ -1,6 +1,8 @@
 <?php
 namespace Ackintosh\Race;
 
+use Ackintosh\Race\Message\Ready;
+
 class Coordinator
 {
     /**
@@ -61,7 +63,7 @@ class Coordinator
     private function waitUntilReady()
     {
         foreach ($this->agents as $agent) {
-            $this->queue->receive();
+            $this->queue->receive(Ready::class);
         }
     }
 

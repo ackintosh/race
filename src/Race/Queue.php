@@ -2,6 +2,9 @@
 namespace Ackintosh\Race;
 
 
+use Ackintosh\Race\Message\Message;
+use Ackintosh\Race\Message\Ready;
+
 class Queue
 {
     /**
@@ -9,9 +12,12 @@ class Queue
      */
     private $key;
 
+    private $keys = [];
+
     public function __construct()
     {
         $this->key = ftok(__FILE__, 'Q');
+        $this->keys[Ready::class] = ftok(__FILE__, 'R');
     }
 
     /**
@@ -20,13 +26,29 @@ class Queue
      */
     public function send($to, $message)
     {
-        $resource = msg_get_queue($this->key);
+        if ($message instanceof Message) {
+            if (!isset($this->keys[get_class($message)])) {
+                throw new \LogicException();
+            }
+            $key = $this->keys[get_class($message)];
+        } else {
+            $key = $this->key;
+        }
+        $resource = msg_get_queue($key);
         msg_send($resource, $to, $message);
     }
 
-    public function receive()
+    public function receive(?string $messageClass = null)
     {
-        $resource = msg_get_queue($this->key);
+        if ($messageClass) {
+            if (!isset($this->keys[$messageClass])) {
+                throw new \LogicException();
+            }
+            $key = $this->keys[$messageClass];
+        } else {
+            $key = $this->key;
+        }
+        $resource = msg_get_queue($key);
         $receivedMessageType = null;
         $message = null;
         msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message);
