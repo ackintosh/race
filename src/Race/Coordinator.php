@@ -9,13 +9,27 @@ class Coordinator
     private $agents = [];
 
     /**
+     * @var Queue
+     */
+    private $queue;
+
+    public function __construct()
+    {
+        $this->queue = new Queue();
+    }
+
+    /**
      * @param \Closure $job
      * @return void
      */
     public function fork(\Closure $job)
     {
+        $coodinatorPid = getmypid();
         $pid = pcntl_fork();
-        $agent = new Agent(($pid === 0) ? getmypid() : $pid);
+        $agent = new Agent(
+            ($pid === 0) ? getmypid() : $pid,
+            $coodinatorPid
+        );
 
         if ($pid === -1) {
             throw new \RuntimeException('Failed to fork.');
@@ -47,19 +61,25 @@ class Coordinator
     private function waitUntilReady()
     {
         foreach ($this->agents as $agent) {
-            $receivedMessageType = null;
-            $message = null;
-            $resource = msg_get_queue($agent->getPid());
-            msg_receive($resource, 1, $receivedMessageType, 100, $message);
+            $this->queue->receive();
         }
     }
 
     private function notifyAll()
     {
-        $startAt = microtime(true) + 3;
+        $allProcessIds = $this->allProcessIds();
         foreach ($this->agents as $agent) {
-            $resource = msg_get_queue($agent->getPid());
-            msg_send($resource, 2, $startAt);
+            $this->queue->send($agent->getPid(), $allProcessIds);
         }
+    }
+
+    /**
+     * @return int[]
+     */
+    private function allProcessIds()
+    {
+        return array_map(function (Agent $agent) {
+            return $agent->getPid();
+        }, $this->agents);
     }
 }

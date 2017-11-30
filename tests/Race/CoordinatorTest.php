@@ -20,6 +20,7 @@ class CoordinatorTest extends \PHPUnit\Framework\TestCase
 
         $coordinator->fork($job);
         $coordinator->fork($job);
+        $coordinator->fork($job);
         $coordinator->run();
 
         // Preparation takes 3sec
