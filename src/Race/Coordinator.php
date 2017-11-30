@@ -88,4 +88,10 @@ class Coordinator
             $this->agents
         ));
     }
+
+    public function __destruct()
+    {
+        // Release the system resources held by message queue.
+        $this->queue->cleanup();
+    }
 }

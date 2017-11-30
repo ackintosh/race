@@ -1,7 +1,6 @@
 <?php
 namespace Ackintosh\Race;
 
-
 use Ackintosh\Race\Message\AllProcessIds;
 use Ackintosh\Race\Message\Message;
 use Ackintosh\Race\Message\Ready;
@@ -49,5 +48,15 @@ class Queue
         msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message);
 
         return $message;
+    }
+
+    /**
+     * @return void
+     */
+    public function cleanup()
+    {
+        foreach ($this->keys as $k) {
+            msg_remove_queue(msg_get_queue($k));
+        }
     }
 }
