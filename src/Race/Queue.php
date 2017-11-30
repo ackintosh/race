@@ -2,6 +2,7 @@
 namespace Ackintosh\Race;
 
 
+use Ackintosh\Race\Message\AllProcessId;
 use Ackintosh\Race\Message\Message;
 use Ackintosh\Race\Message\Ready;
 
@@ -18,6 +19,7 @@ class Queue
     {
         $this->key = ftok(__FILE__, 'Q');
         $this->keys[Ready::class] = ftok(__FILE__, 'R');
+        $this->keys[AllProcessId::class] = ftok(__FILE__, 'P');
     }
 
     /**

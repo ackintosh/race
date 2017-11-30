@@ -1,6 +1,7 @@
 <?php
 namespace Ackintosh\Race;
 
+use Ackintosh\Race\Message\AllProcessId;
 use Ackintosh\Race\Message\Ready;
 
 class Agent
@@ -41,10 +42,10 @@ class Agent
 
         $this->queue->send($this->coodinatorPid, new Ready());
 
-        $allProcessIds = $this->queue->receive();
+        $allProcessIds = $this->queue->receive(AllProcessId::class);
 
-        $this->send($allProcessIds);
-        $candidates = $this->receive($allProcessIds);
+        $this->send($allProcessIds->body());
+        $candidates = $this->receive($allProcessIds->body());
 
         $raceStartsAt = $this->buildConsensus($candidates);
 
