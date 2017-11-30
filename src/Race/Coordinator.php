@@ -1,7 +1,7 @@
 <?php
 namespace Ackintosh\Race;
 
-use Ackintosh\Race\Message\AllProcessId;
+use Ackintosh\Race\Message\AllProcessIds;
 use Ackintosh\Race\Message\Ready;
 
 class Coordinator
@@ -70,18 +70,18 @@ class Coordinator
 
     private function notifyAll()
     {
-        $allProcessId = $this->allProcessId();
+        $allProcessIds = $this->allProcessIds();
         foreach ($this->agents as $agent) {
-            $this->queue->send($agent->getPid(), $allProcessId);
+            $this->queue->send($agent->getPid(), $allProcessIds);
         }
     }
 
     /**
-     * @return AllProcessId
+     * @return AllProcessIds
      */
-    private function allProcessId(): AllProcessId
+    private function allProcessIds(): AllProcessIds
     {
-        return new AllProcessId(array_map(
+        return new AllProcessIds(array_map(
             function (Agent $agent) {
                 return $agent->getPid();
             },

@@ -1,7 +1,7 @@
 <?php
 namespace Ackintosh\Race;
 
-use Ackintosh\Race\Message\AllProcessId;
+use Ackintosh\Race\Message\AllProcessIds;
 use Ackintosh\Race\Message\Ready;
 use Ackintosh\Race\Message\StartingTime;
 
@@ -43,7 +43,7 @@ class Agent
 
         $this->queue->send($this->coodinatorPid, new Ready());
 
-        $allProcessIds = $this->queue->receive(AllProcessId::class);
+        $allProcessIds = $this->queue->receive(AllProcessIds::class);
 
         $this->sendCandidateTo($allProcessIds);
         $candidates = $this->receiveCandidatesFrom($allProcessIds);
@@ -56,10 +56,10 @@ class Agent
     }
 
     /**
-     * @param AllProcessId $allProcessId
+     * @param AllProcessIds $allProcessIds
      * @return void
      */
-    private function sendCandidateTo(AllProcessId $allProcessIds)
+    private function sendCandidateTo(AllProcessIds $allProcessIds)
     {
         $candidate = new StartingTime(microtime(true) + 3);
         foreach ($allProcessIds->body() as $pid) {
@@ -72,10 +72,10 @@ class Agent
     }
 
     /**
-     * @param AllProcessId $allProcessId
+     * @param AllProcessIds $allProcessIds
      * @return StartingTime[]
      */
-    private function receiveCandidatesFrom(AllProcessId $allProcessIds): array
+    private function receiveCandidatesFrom(AllProcessIds $allProcessIds): array
     {
         $candidates = [];
         foreach ($allProcessIds->body() as $pid) {
