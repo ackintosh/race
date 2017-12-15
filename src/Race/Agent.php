@@ -24,6 +24,16 @@ class Agent
     private $queue;
 
     /**
+     * @var bool
+     */
+    private $behaveAsFailureProcess = false;
+
+    /**
+     * @var int
+     */
+    private $numberOfCandidateListSent = 0;
+
+    /**
      * @param int $pid
      * @param int $coodinatorPid
      */
@@ -55,6 +65,7 @@ class Agent
         for ($i = 0; $i < ($numberOfProcess - 1); $i++) {
             $this->sendCandidateList($allProcessIds, $myCandidateList);
             $candidateLists = $this->receiveCandidateLists($allProcessIds);
+            var_dump(getmypid(), $candidateLists);
             foreach ($candidateLists as $receivedList) {
                 $myCandidateList->merge($receivedList);
             }
@@ -65,6 +76,11 @@ class Agent
         while (microtime(true) <= $raceStartsAt) {
             // wait until the time race should start
         }
+    }
+
+    public function behaveAsFailureProcess()
+    {
+        $this->behaveAsFailureProcess = true;
     }
 
     /**
@@ -79,7 +95,13 @@ class Agent
                 continue;
             }
 
+            if ($this->behaveAsFailureProcess && $this->numberOfCandidateListSent >= 1) {
+                var_dump('[' . getmypid() . '] die.');
+                die();
+            }
+
             $this->queue->send($pid, $candidateList);
+            $this->numberOfCandidateListSent++;
         }
     }
 
@@ -114,6 +136,11 @@ class Agent
     {
         $consensus = null;
         foreach ($candidateList->body() as $startingTime) {
+            if ($startingTime === null) {
+                // The process had stopped from the beginning
+                continue;
+            }
+
             if ($consensus === null || $consensus < $startingTime->body()) {
                 $consensus = $startingTime->body();
             }
