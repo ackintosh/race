@@ -15,6 +15,11 @@ class Queue
 
     private $keys = [];
 
+    /**
+     * @var resource[]
+     */
+    private $resources = [];
+
     public function __construct()
     {
         $this->keys[Ready::class] = ftok(__FILE__, 'R');
@@ -42,7 +47,7 @@ class Queue
             throw new \LogicException();
         }
 
-        $resource = msg_get_queue($this->keys[$messageClass]);
+        $resource = $this->resource($messageClass);
         $receivedMessageType = null;
         $message = null;
 
@@ -53,6 +58,19 @@ class Queue
         }
 
         return $message;
+    }
+
+    /**
+     * @param string $messageClass
+     * @return resource
+     */
+    private function resource(string $messageClass)
+    {
+        if (!isset($this->resources[$messageClass])) {
+            $this->resources[$messageClass] = msg_get_queue($this->keys[$messageClass]);
+        }
+
+        return $this->resources[$messageClass];
     }
 
     /**
