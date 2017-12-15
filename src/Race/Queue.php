@@ -36,7 +36,7 @@ class Queue
         msg_send($resource, $to, $message);
     }
 
-    public function receive(string $messageClass)
+    public function receive(string $messageClass, bool $nowait = false)
     {
         if (!isset($this->keys[$messageClass])) {
             throw new \LogicException();
@@ -45,7 +45,12 @@ class Queue
         $resource = msg_get_queue($this->keys[$messageClass]);
         $receivedMessageType = null;
         $message = null;
-        msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message);
+
+        if ($nowait) {
+            msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message, true, MSG_IPC_NOWAIT);
+        } else {
+            msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message);
+        }
 
         return $message;
     }

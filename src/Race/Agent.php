@@ -89,13 +89,18 @@ class Agent
      */
     private function receiveCandidateLists(AllProcessIds $allProcessIds): array
     {
+        $t = time();
         $candidateLists = [];
-        foreach ($allProcessIds->body() as $pid) {
-            if ($pid === $this->pid) {
-                continue;
+        while (time() < ($t + 5)) {
+            if (
+                MSG_ENOMSG !== ($message = $this->queue->receive(CandidateList::class, true))
+                && $message instanceof \Ackintosh\Race\Message\Message
+            ) {
+                $candidateLists[] = $message;
+                if (count($candidateLists) === (count($allProcessIds->body()) - 1)) {
+                    break;
+                }
             }
-
-            $candidateLists[] = $this->queue->receive(CandidateList::class);
         }
 
         return $candidateLists;
