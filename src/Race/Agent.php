@@ -61,10 +61,11 @@ class Agent
         $myCandidateList = new CandidateList($allProcessIds);
         $myCandidateList->setMyCandidate(new StartingTime(microtime(true) + 3));
 
+        $address = new Address();
         // allows failure process (N - 1)
         for ($i = 0; $i < ($numberOfProcess - 1); $i++) {
-            $this->sendCandidateList($allProcessIds, $myCandidateList);
-            $candidateLists = $this->receiveCandidateLists($allProcessIds);
+            $this->sendCandidateList($address, $allProcessIds, $myCandidateList);
+            $candidateLists = $this->receiveCandidateLists($address, $allProcessIds);
             var_dump(getmypid(), $candidateLists);
             foreach ($candidateLists as $receivedList) {
                 $myCandidateList->merge($receivedList);
@@ -84,11 +85,12 @@ class Agent
     }
 
     /**
+     * @param Address $destination
      * @param AllProcessIds $allProcessIds
      * @param CandidateList $candidateList
      * @return void
      */
-    private function sendCandidateList(AllProcessIds $allProcessIds, CandidateList $candidateList)
+    private function sendCandidateList(Address $destination, AllProcessIds $allProcessIds, CandidateList $candidateList)
     {
         foreach ($allProcessIds->body() as $pid) {
             if ($pid === $this->pid) {
@@ -100,7 +102,7 @@ class Agent
                 die();
             }
 
-            $this->queue->send($pid, $candidateList);
+            $this->queue->send($destination->to($pid), $candidateList);
             $this->numberOfCandidateListSent++;
         }
     }
@@ -109,7 +111,7 @@ class Agent
      * @param AllProcessIds $allProcessIds
      * @return CandidateList[]
      */
-    private function receiveCandidateLists(AllProcessIds $allProcessIds): array
+    private function receiveCandidateLists(Address $address, AllProcessIds $allProcessIds): array
     {
         $t = time();
         $candidateLists = [];
@@ -118,7 +120,7 @@ class Agent
                 continue;
             }
             if (
-                MSG_ENOMSG !== ($message = $this->queue->receive(CandidateList::class, true))
+                MSG_ENOMSG !== ($message = $this->queue->receive(CandidateList::class, $address->from(), true))
                 && $message instanceof \Ackintosh\Race\Message\Message
             ) {
                 $candidateLists[] = $message;
