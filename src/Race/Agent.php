@@ -114,14 +114,14 @@ class Agent
         $t = time();
         $candidateLists = [];
         while (time() < ($t + 5)) {
+            if (count($candidateLists) === (count($allProcessIds->body()) - 1)) {
+                continue;
+            }
             if (
                 MSG_ENOMSG !== ($message = $this->queue->receive(CandidateList::class, true))
                 && $message instanceof \Ackintosh\Race\Message\Message
             ) {
                 $candidateLists[] = $message;
-                if (count($candidateLists) === (count($allProcessIds->body()) - 1)) {
-                    break;
-                }
             }
         }
 
