@@ -18,17 +18,28 @@ class CoordinatorTest extends \PHPUnit\Framework\TestCase
             return 'test';
         };
 
+        $jobThatMightFail = function (Agent $agent) {
+            // Process will fail.
+            $agent->behaveAsFailureProcess();
+            // Job requires the preparation that takes 3secs.
+            sleep(3);
+            $agent->ready();
+
+            return 'test';
+        };
+
         $coordinator->fork($job);
-        $coordinator->fork($job);
+        $coordinator->fork($jobThatMightFail);
         $coordinator->fork($job);
         $coordinator->run();
 
-        // Preparation takes 3sec
-        // +
-        // Agents are notify the time which has been added 3sec as candidate of starting time
-        // +
-        // No failure process
-        // = 6sec (We allow for a margin of error)
-        $this->assertEquals(6, time() - $t, '', 1);
+        // Preparation takes 3secs
+        //  +
+        // Consensus algorithm requires (process * 5)secs
+        //  +
+        // Agents are notify the time which has been added 3secs as candidate of starting time
+        //
+        //  = 21sec (We allow for a margin of error as fourth argument of `assertEquals`)
+        $this->assertEquals(21, time() - $t, '', 1);
     }
 }
