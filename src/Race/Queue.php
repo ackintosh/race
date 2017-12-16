@@ -2,9 +2,9 @@
 namespace Ackintosh\Race;
 
 use Ackintosh\Race\Message\AllProcessIds;
+use Ackintosh\Race\Message\CandidateList;
 use Ackintosh\Race\Message\Message;
 use Ackintosh\Race\Message\Ready;
-use Ackintosh\Race\Message\StartingTime;
 
 class Queue
 {
@@ -15,11 +15,16 @@ class Queue
 
     private $keys = [];
 
+    /**
+     * @var resource[]
+     */
+    private $resources = [];
+
     public function __construct()
     {
         $this->keys[Ready::class] = ftok(__FILE__, 'R');
         $this->keys[AllProcessIds::class] = ftok(__FILE__, 'P');
-        $this->keys[StartingTime::class] = ftok(__FILE__, 'T');
+        $this->keys[CandidateList::class] = ftok(__FILE__, 'C');
     }
 
     /**
@@ -36,18 +41,40 @@ class Queue
         msg_send($resource, $to, $message);
     }
 
-    public function receive(string $messageClass)
+    public function receive(string $messageClass, int $from = null, bool $nowait = false)
     {
         if (!isset($this->keys[$messageClass])) {
             throw new \LogicException();
         }
 
-        $resource = msg_get_queue($this->keys[$messageClass]);
+        if (!$from) {
+            $from = getmypid();
+        }
+
+        $resource = $this->resource($messageClass);
         $receivedMessageType = null;
         $message = null;
-        msg_receive($resource, getmypid(), $receivedMessageType, 1000, $message);
+
+        if ($nowait) {
+            msg_receive($resource, $from, $receivedMessageType, 1000, $message, true, MSG_IPC_NOWAIT);
+        } else {
+            msg_receive($resource, $from, $receivedMessageType, 1000, $message);
+        }
 
         return $message;
+    }
+
+    /**
+     * @param string $messageClass
+     * @return resource
+     */
+    private function resource(string $messageClass)
+    {
+        if (!isset($this->resources[$messageClass])) {
+            $this->resources[$messageClass] = msg_get_queue($this->keys[$messageClass]);
+        }
+
+        return $this->resources[$messageClass];
     }
 
     /**

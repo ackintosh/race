@@ -12,12 +12,18 @@ class Coordinator
     private $agents = [];
 
     /**
+     * @var int
+     */
+    private $coodinatorPid;
+
+    /**
      * @var Queue
      */
     private $queue;
 
     public function __construct()
     {
+        $this->coodinatorPid = getmypid();
         $this->queue = new Queue();
     }
 
@@ -91,7 +97,9 @@ class Coordinator
 
     public function __destruct()
     {
-        // Release the system resources held by message queue.
-        $this->queue->cleanup();
+        if ($this->coodinatorPid === getmypid()) {
+            // Release the system resources held by message queue.
+            $this->queue->cleanup();
+        }
     }
 }
