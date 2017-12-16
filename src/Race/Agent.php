@@ -59,7 +59,9 @@ class Agent
         $numberOfProcess = count($allProcessIds->body());
 
         $myCandidateList = new CandidateList($allProcessIds);
-        $myCandidateList->setMyCandidate(new StartingTime(microtime(true) + 3));
+        $myCandidateList->setMyCandidate(
+            new StartingTime(microtime(true) + ($numberOfProcess * 5) + 3)
+        );
 
         $term = new Term();
         $address = new Address($term);
