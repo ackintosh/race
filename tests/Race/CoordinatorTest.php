@@ -6,7 +6,7 @@ class CoordinatorTest extends \PHPUnit\Framework\TestCase
     /**
      * @test
      */
-    public function fork()
+    public function ConsensusAlgorithmRequiresPrescribedTime()
     {
         $coordinator = new Coordinator();
         $t = time();
