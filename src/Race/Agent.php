@@ -61,15 +61,18 @@ class Agent
         $myCandidateList = new CandidateList($allProcessIds);
         $myCandidateList->setMyCandidate(new StartingTime(microtime(true) + 3));
 
-        $address = new Address();
+        $term = new Term();
+        $address = new Address($term);
         // allows failure process (N - 1)
         for ($i = 0; $i < ($numberOfProcess - 1); $i++) {
             $this->sendCandidateList($address, $allProcessIds, $myCandidateList);
             $candidateLists = $this->receiveCandidateLists($address, $allProcessIds);
-            var_dump(getmypid(), $candidateLists);
+            var_dump('[' . getmypid() . '][' . $term->current() . ']', $candidateLists);
             foreach ($candidateLists as $receivedList) {
                 $myCandidateList->merge($receivedList);
             }
+
+            $term->next();
         }
 
         $raceStartsAt = $this->buildConsensus($myCandidateList);
