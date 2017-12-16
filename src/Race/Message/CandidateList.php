@@ -1,7 +1,7 @@
 <?php
 namespace Ackintosh\Race\Message;
 
-class CandidateList implements Message
+class CandidateList implements Message, \Serializable
 {
     /**
      * @var array
@@ -35,5 +35,23 @@ class CandidateList implements Message
     public function body(): array
     {
         return $this->list;
+    }
+
+    public function serialize()
+    {
+        $list = [];
+        foreach ($this->list as $pid => $startingTime) {
+            // reduce payload size
+            $list[$pid] = $startingTime ? $startingTime->body() : null;
+        }
+
+        return serialize($list);
+    }
+
+    public function unserialize($serialized)
+    {
+        foreach (unserialize($serialized, [CandidateList::class]) as $pid => $time) {
+            $this->list[$pid] = $time ? new StartingTime($time) : null;
+        }
     }
 }
