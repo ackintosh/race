@@ -8,6 +8,15 @@ class Term
 
     public function __construct(int $max)
     {
+        if ($max < 1) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    '$max must be 1 or more. %d was passed.',
+                    $max
+                )
+            );
+        }
+
         $this->max = $max;
     }
 
